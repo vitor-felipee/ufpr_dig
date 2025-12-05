@@ -2,7 +2,8 @@
 session_start();
 include("connection.php");
 
-if (!isset($_POST['nome']) || empty($_POST['nome'])) {
+if (!isset($_POST['nome']) || empty($_POST['nome']) || !isset($_POST['email']) || empty($_POST['email'])) {
+  $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Houve um erro inesperado.</div>";
   header("Location: registro.php");
   exit;
 }
