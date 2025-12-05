@@ -18,27 +18,30 @@ if ($senha !== $confirmarSenha) {
   exit;
 }
 
-$sql = "SELECT COUNT(*) FROM usuarios WHERE email = '$email'";
-if ($emailExiste = mysqli_query($conn, $sql)) {
-  if (mysqli_num_rows($emailExiste) === 0) {
-    $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO usuarios (nome, email, senha) VALUES ('$nome', '$email', '$senhaHash')";
-    if (mysqli_query($conn, $sql)) {
-      $_SESSION['msg_registro'] = "<div class='alert alert-success'>Usuário cadastrado com sucesso! <a href='login.php' class='alert-link'>Faça Login</a></div>";
-      header("Location: registro.php");
-      exit;
-    } else {
-      $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Erro ao cadastrar: " . mysqli_error($conn) . "</div>";
-      header("Location: registro.php");
-      exit;
-    }
-  } else {
-    $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Erro inesperado ao cadastrar: " . mysqli_error($conn) . "</div>";
-    header("Location: registro.php");
-    exit;
-  }
+$sql = "SELECT * FROM usuarios WHERE email = '$email' LIMIT 1";
+$result = mysqli_query($conn, $sql);
+
+if (!$result) {
+  $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Erro ao verificar email: " . mysqli_error($conn) . "</div>";
+  header("Location: registro.php");
+  exit;
+}
+
+if (mysqli_num_rows($result) > 0) {
+  $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Email já cadastrado!</div>";
+  header("Location: registro.php");
+  exit;
+}
+
+$senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+$sql = "INSERT INTO usuarios (nome, email, senha) VALUES ('$nome', '$email', '$senhaHash')";
+
+if (mysqli_query($conn, $sql)) {
+  $_SESSION['msg_registro'] = "<div class='alert alert-success'>Usuário cadastrado com sucesso! <a href='login.php' class='alert-link'>Faça Login</a></div>";
+  header("Location: registro.php");
+  exit;
 } else {
-  $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Erro inesperado ao cadastrar: " . mysqli_error($conn) . "</div>";
+  $_SESSION['msg_registro'] = "<div class='alert alert-danger'>Erro ao cadastrar: " . mysqli_error($conn) . "</div>";
   header("Location: registro.php");
   exit;
 }
